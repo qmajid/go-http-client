@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -10,29 +11,23 @@ import (
 
 const (
 	WITH_DEFAULT_HTTP_CLIENT_SETTING bool = false
-	CLINT_TIMEOUT                    int  = 10
-	ALL_MESSAGES_COUNT               int  = 200
-	NUMBER_OF_CONNECTIONS            int  = 2
+	//-------------
+	NUMBER_OF_CONNECTIONS int = 1
+	ALL_MESSAGES_COUNT    int = 1000
+	CLINT_TIMEOUT         int = 2000 //ms
+)
+
+var (
+	ERROR_COUNT int
+	mu          sync.Mutex
 )
 
 func main() {
 	log.Println("HTTP GET")
-
-	senario1()
-	log.Println("------------------------------------------")
-	// senario2()
+	run()
 }
 
-func senario1() {
-	var wg sync.WaitGroup
-	for range 1 {
-		wg.Add(1)
-		go createNewConnection(ALL_MESSAGES_COUNT, &wg)
-	}
-	wg.Wait()
-}
-
-func senario2() {
+func run() {
 	var wg sync.WaitGroup
 	message_per_connection := ALL_MESSAGES_COUNT / NUMBER_OF_CONNECTIONS
 	for range NUMBER_OF_CONNECTIONS {
@@ -40,6 +35,7 @@ func senario2() {
 		go createNewConnection(message_per_connection, &wg)
 	}
 	wg.Wait()
+	log.Printf("scenario_2 error count: %v\n", ERROR_COUNT)
 }
 
 func createNewConnection(messageCount int, waitGroup *sync.WaitGroup) {
@@ -73,9 +69,14 @@ func createNewConnection(messageCount int, waitGroup *sync.WaitGroup) {
 
 func send(client *http.Client, wg *sync.WaitGroup, counter int) {
 	defer wg.Done()
+	start_time := time.Now()
 	r, err := client.Get(`http://127.0.0.1:8080/`)
+	fmt.Printf("elapsed time: %v\n", time.Since(start_time))
 	if err != nil {
-		log.Printf("Get error[%v][%v]\n", counter, err)
+		mu.Lock()
+		// log.Printf("Get error[%v][%v]\n", counter, err)
+		ERROR_COUNT++
+		mu.Unlock()
 		return
 	}
 	defer r.Body.Close()
