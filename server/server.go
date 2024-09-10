@@ -10,7 +10,7 @@ import (
 func main() {
 	http.HandleFunc(`/`, func(w http.ResponseWriter, r *http.Request) {
 		log.Println("wait a couple of seconds ...")
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(1000 * time.Millisecond)
 		io.WriteString(w, `Hi`)
 		log.Println("Done.")
 	})

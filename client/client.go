@@ -12,9 +12,9 @@ import (
 const (
 	WITH_DEFAULT_HTTP_CLIENT_SETTING bool = false
 	//-------------
-	NUMBER_OF_CONNECTIONS int = 1
-	ALL_MESSAGES_COUNT    int = 1000
-	CLINT_TIMEOUT         int = 2000 //ms
+	NUMBER_OF_CONNECTIONS int = 5
+	ALL_MESSAGES_COUNT    int = 500
+	CLINT_TIMEOUT         int = 10000 //ms
 )
 
 var (
